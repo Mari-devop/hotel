@@ -1,38 +1,31 @@
 import React from 'react';
-import Signin from './components/SignIn';
 import Signup from './components/Signup';
-import Account from './components/Account';
+import Room from './components/Room';
+import Main from './components/Main'
 import { Route, Routes } from 'react-router-dom';
 import { AuthContextProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useSelector, useDispatch } from 'react-redux';
+import './App.css';
 
 function App() {
  
-  const userAct = useSelector (store => store.users.user);
+  const usersReducer = useSelector (store => store.users.user);
   const dispatch = useDispatch();
-
-  const handleClick = () =>{
-    dispatch({type: "CHANGE_TEXT", payload: "Hello"})
-  }
 
   return (
     <div className="App">
-      <h1 className="text-center">
-                Firebase Auth & Context
-      </h1>
-      <p onClick={()=> {handleClick()}}>fghj</p>
-      <p>{userAct}</p>
-
+     
       <AuthContextProvider>
         <Routes>
-          <Route path='/' element={<Signin />} />
-          <Route path='/signup' element={<Signup />} />
+          <Route path='/' element={<Signup />} />
+          <Route path='/main' element={<Main />} />
+        
           <Route
-            path='/account'
+            path='/room'
             element={
               <ProtectedRoute>
-                <Account />
+                <Room />
               </ProtectedRoute>
             }
           />

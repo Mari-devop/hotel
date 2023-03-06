@@ -1,3 +1,4 @@
+import '@firebase/firestore' // 👈 If you're using firestore
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
@@ -44,3 +45,4 @@ export const AuthContextProvider = ({ children }) => {
 export const UserAuth = () => {
   return useContext(UserContext);
 };
+

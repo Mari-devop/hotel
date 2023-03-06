@@ -17,5 +17,6 @@ export function* watchClickSaga(){
 export default function* rootSaga() {
     console.log("rootSaga")
     yield takeEvery("CHANGE_TEXT", watchChangeText)
+  
    
 }
