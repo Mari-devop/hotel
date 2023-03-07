@@ -1,23 +1,26 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createStore } from "redux"
 import { UserAuth } from '../context/AuthContext';
 import { Layout, Menu} from 'antd';
 import { UserOutlined } from '@ant-design/icons'
+//import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import {db} from "../firebase";
 import {query, collection, onSnapshot} from "firebase/firestore";
 import Checkin from './CheckIn'
 import Checkout from './CheckOut'
+import roomsReducer from '../redux/reducers/roomsReducer'
 
 const { Header, Content, Footer } = Layout;
 
 const Room = () => {
-  //get Firebase
+
   const {id} = useParams();
   const [data, setData] = useState([]);
-  const [post, setPost] = useState({});
-
+  const [room, setRoom] = useState({});
+ 
   useEffect(() =>{
   const q = query(collection(db, 'Rooms'));
   const unsubscribe = onSnapshot(q, queryCollection  => {
@@ -26,19 +29,17 @@ const Room = () => {
       arr.push({...doc.data(), id: doc.id});
     });
     console.log(arr);
+   
     setData(arr);
-
   })
-  return () =>{
-    unsubscribe();
-  }
 }, []);
 
 useEffect(() =>{
-  const p = data.find(doc => doc.id === id)
-  setPost (p);
+  const currentRoom = room.find(item => item.id === id)
+  setRoom (currentRoom);
 
 }, [data, id])
+
 
 //Auth log out
   const { user, logout } = UserAuth();
@@ -78,7 +79,6 @@ useEffect(() =>{
     </Header>
 
     <Content className="content-layout" >
-   
           <div className='content-btn'>
            <Checkin />
            <Checkout /> 

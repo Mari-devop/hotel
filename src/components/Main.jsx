@@ -33,7 +33,7 @@ const Main = () => {
   const {id} = useParams();
   const [data, setData] = useState([]);
   const [post, setPost] = useState({});
-
+  
   useEffect(() =>{
   const q = query(collection(db, 'Rooms'));
   const unsubscribe = onSnapshot(q, queryCollection  => {
@@ -42,6 +42,7 @@ const Main = () => {
       arr.push({...doc.data(), id: doc.id});
     });
     console.log(arr);
+   
     setData(arr);
 
   })
@@ -149,7 +150,7 @@ useEffect(() =>{
       
       render: (text, record) => (
         <Button type="primary" >
-          <Link to={`./room/${data.id}`}>
+          <Link to={`./room/${ record.id}`}>
             More information
           </Link>
         </Button> 
@@ -165,9 +166,9 @@ useEffect(() =>{
   return (
     <Layout>
       <Header>
-      <div class="header">
-        <a href="#default" class="logo">CompanyLogo</a>
-        <div class="header-right">
+      <div className="header">
+        <a href="#default" className="logo">CompanyLogo</a>
+        <div className="header-right">
           <a 
             href="#contact"
             onClick={handleLogout} 
