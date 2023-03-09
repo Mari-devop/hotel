@@ -1,12 +1,9 @@
 import { all, call } from "redux-saga/effects";
-import usersSaga from './usersSaga'
-import roomSaga from './roomSaga'
+import watchUsersSaga from "./usersSaga";
+import watchRoomsSaga from "./roomSaga";
 
-
-const mainSaga = [usersSaga , roomSaga];
+const mainSaga = [watchRoomsSaga];
 
 export default function* watchrootSaga() {
-  
-  yield all(mainSaga.map(s => call(s)));
-   
+  yield all(mainSaga.map((s) => call(s)));
 }
