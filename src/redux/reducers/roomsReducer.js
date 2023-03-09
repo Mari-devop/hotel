@@ -1,15 +1,13 @@
-import { GET_ROOMS, GET_ROOMS_SUCCESS, SHOW_NOTIFICATION } from '../actions/roomsActions';
+import { GET_ROOMS_SUCCESS} from '../actions/roomsActions';
 
-const initialState = [];
+const initialState = {
+  rooms: []
+};
 
-const roomsReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case GET_ROOMS:
-      return  { ...state, room: [action.payload] };
+const roomsReducer = (state = initialState, { type, payload }) => {
+  switch (type) {
     case GET_ROOMS_SUCCESS:
-      return { ...state, room: action.payload };
-    case SHOW_NOTIFICATION:
-      return initialState;
+      return { ...state, ...payload };
     default:
       return state;
   }

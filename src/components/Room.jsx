@@ -1,24 +1,36 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createStore } from "redux"
-import { UserAuth } from '../context/AuthContext';
-import { Layout, Menu} from 'antd';
-import { UserOutlined } from '@ant-design/icons'
-//import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import {db} from "../firebase";
 import {query, collection, onSnapshot} from "firebase/firestore";
+import { UserAuth } from '../context/AuthContext';
+import { Layout, Menu} from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 import Checkin from './CheckIn'
 import Checkout from './CheckOut'
-import roomsReducer from '../redux/reducers/roomsReducer'
+
 
 const { Header, Content, Footer } = Layout;
 
 const Room = () => {
 
+//Auth log out
+  const { user, logout } = UserAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+      console.log('You are logged out')
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
+
   const {id} = useParams();
-  const [data, setData] = useState([]);
+  const [rooms, setData] = useState([]);
   const [room, setRoom] = useState({});
  
   useEffect(() =>{
@@ -35,34 +47,20 @@ const Room = () => {
 }, []);
 
 useEffect(() =>{
-  const currentRoom = room.find(item => item.id === id)
+  const currentRoom = rooms.find(item => item.id === id)
   setRoom (currentRoom);
 
-}, [data, id])
+}, [rooms, id])
 
-
-//Auth log out
-  const { user, logout } = UserAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-      console.log('You are logged out')
-    } catch (e) {
-      console.log(e.message);
-    }
-  };
   return (
-  
-      
+    <>
+   
     <Layout>
        
     <Header>
-    <div class="header">
-      <a href="#default" class="logo">CompanyLogo</a>
-      <div class="header-right">
+    <div className="header">
+      <a href="#default" className="logo">CompanyLogo</a>
+      <div className="header-right">
         <a 
           href="#contact"
           onClick={handleLogout} 
@@ -76,6 +74,7 @@ useEffect(() =>{
         theme="dark"
         mode="horizontal" 
       />
+      
     </Header>
 
     <Content className="content-layout" >
@@ -85,15 +84,15 @@ useEffect(() =>{
           </div>
           <div className='content-wrapper'>
           <div className='wrapper-image'>
-            <img className="article-img" src="" alt="Card cap" />
+            <img className="article-img" src={room && room.gallery} alt="Card cap" />
           </div>
           <div className='wrapper-content'>
-            <h2>Room</h2>
-            <p>Type:</p>
-            <p>Occupancy:</p>
-            <p>Price:</p>
-            <p>Guest:</p>
-            <p>Features</p>
+            <h2>Room{room && room.id}</h2>
+            <p>Type:{room && room.id}</p>
+            <p>Occupancy:{room && room.id}</p>
+            <p>Price:{room && room.id}</p>
+            <p>Guest:{room && room.id}</p>
+            <p>Features{room && room.id}</p>
           </div> 
       </div>
       <div className='content-descr'>
@@ -108,7 +107,7 @@ useEffect(() =>{
         
      
     </Layout>
-      
+     </> 
   );
 }
 

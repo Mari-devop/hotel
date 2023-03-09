@@ -1,18 +1,22 @@
-import {GET_ACCOUNTS, GET_ACCOUNTS_SUCCESS, SHOW_NOTIFICATION } from '../actions/usersActions';
+import { GET_ACCOUNTS_SUCCESS, LOGIN_SUCCESS, LOGOUT_SUCCESS} from '../actions/usersActions';
 
 const initialState = {
-  user: null,
-  error: null
+  accounts: {},
+  userAuth: {
+    isAuth: false,
+    userName: '',
+  }
 };
 
-const usersReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case GET_ACCOUNTS:
-      return { ...state, user: action.payload, error: null };
+const usersReducer = (state = initialState, { type, payload }) => {
+  switch (type) {
     case GET_ACCOUNTS_SUCCESS:
-      return { ...state, user: action.payload, error: null };
-    case SHOW_NOTIFICATION:
-      return initialState;
+      return { ...state, accounts: {...state.accounts, ...payload}, };
+    case LOGIN_SUCCESS:
+      return {...state, userAuth: {...state.userAuth, isAuth:true, ...payload}, };
+    case LOGOUT_SUCCESS:
+      return {...state, userAuth: { isAuth: false, userName: ''}, };
+ 
     default:
       return state;
   }

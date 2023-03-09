@@ -10,15 +10,22 @@ import { useEffect } from 'react';
 import { getRooms } from './redux/actions/roomsActions';
 import './App.css';
 
-function App() {
-  const usersReducer = useSelector (store => store.users.user);
 
-  const roomsReducer = useSelector (store => store.rooms.room);
+function App() {
+
+  const getIsAuth = (state) => state.users.userAuth.isAuth;
+
+  const getNotifData = (state) => state.notif;
+  const isAuth = useSelector (getIsAuth);
+  const notif = useSelector (getNotifData);
+
   const dispatch = useDispatch();
 
- useEffect(() => {
-    dispatch(getRooms());
-  },[]);
+  useEffect(() => {
+      dispatch(getRooms());
+    },[]);
+ 
+   
 
   return (
     <div className="App">
@@ -28,17 +35,17 @@ function App() {
           <Route path='/' element={<Signup />} />
           <Route path='/main' 
           element={
-            <ProtectedRoute>
+            //<ProtectedRoute>
                   <Main />
-            </ProtectedRoute>
+            //</ProtectedRoute>
           }
           />
            <Route
-            path='/room/:id'
+            path='/:id'
             element={
-              <ProtectedRoute>
+              //<ProtectedRoute>
                 <Room />
-              </ProtectedRoute>
+              //</ProtectedRoute>
             }
           /> 
         </Routes>

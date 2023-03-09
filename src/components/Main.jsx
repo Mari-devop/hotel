@@ -1,37 +1,63 @@
 import React from 'react';
-import { Layout, Menu, Table, Button, Space } from 'antd';
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Layout, Menu, Table, Button, Space, Checkbox } from 'antd';
+import { useState, useEffect, useMemo} from 'react';
 import { UserOutlined } from '@ant-design/icons'
-import {db} from "../firebase";
-import {query, collection, onSnapshot} from "firebase/firestore";
 import { Link, useNavigate } from 'react-router-dom';
 import { UserAuth } from '../context/AuthContext';
 
+import { getRooms } from '../redux/actions/roomsActions';
+import {db} from "../firebase";
+import {query, collection, onSnapshot} from "firebase/firestore";
 
 const { Header, Content, Footer } = Layout;
 const data = []
 
+export const ROOMS_TYPES = {
+  STANDARD: 'standard',
+  DELUXE: 'deluxe',
+  SUITE: 'suite',
+};
+
+export const ROOM_TYPE_LABEL = {
+  [ROOMS_TYPES.STANDARD]: 'Standard',
+  [ROOMS_TYPES.DELUXE]: 'Deluxe',
+  [ROOMS_TYPES.SUITE]: 'Suite',
+};
+
+export const ROOM_OCCUPANCY_LIST = [2, 3, 4];
+
+
 const Main = () => {
-  
-  //Auth log out
-  const { user, logout } = UserAuth();
-  const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-      console.log('You are logged out')
-    } catch (e) {
-      console.log(e.message);
-    }
-  };
+ //Auth log out
+ const { user, logout } = UserAuth();
+ const navigate = useNavigate();
 
+ const handleLogout = async () => {
+   try {
+     await logout();
+     navigate('/');
+     console.log('You are logged out')
+   } catch (e) {
+     console.log(e.message);
+   }
+ };
 
-  //get Firebase
-  const {id} = useParams();
-  const [data, setData] = useState([]);
+  //const getRoomsState = (state) => Object.values(state.rooms);
+  // const { rooms } = useSelector((state) => state.rooms);
+  // const dispatch = useDispatch();
+
+  // console.log(rooms);
+
+  // debugger
+  //  useEffect(() => {
+  //   console.log("sdfghj");
+  //     dispatch(getRooms());
+    
+  // }, []);
+  // debugger
+ 
+  const [rooms, setRooms] = useState([]);
   const [post, setPost] = useState({});
   
   useEffect(() =>{
@@ -43,106 +69,66 @@ const Main = () => {
     });
     console.log(arr);
    
-    setData(arr);
+    setRooms(arr);
 
   })
   return () =>{
     unsubscribe();
   }
 }, []);
-
-useEffect(() =>{
-  const p = data.find(doc => doc.id === id)
-  setPost (p);
-
-}, [data, id])
+  const [isChecked, setIsChecked] = useState(false);
 
 //filter for coloums
   const [filteredInfo, setFilteredInfo] = useState({});
   const [sortedInfo, setSortedInfo] = useState({});
-  const handleChange = (pagination, filters, sorter) => {
-    console.log('Various parameters', pagination, filters, sorter);
-    setFilteredInfo(filters);
-    setSortedInfo(sorter);
-  };
-  const clearFilters = () => {
-    setFilteredInfo({});
-  };
-  
-  const setOccSort = () => {
-    setSortedInfo({
-      order: 'descend',
-      columnKey: 'occupancy',
-    });
-  };
+  const filteredRooms = useMemo(() => (isChecked ? rooms.filter((room) => room.isCheckedIn !== isChecked) : rooms), [rooms, isChecked]);
+  const guestsOptions = useMemo(() => (!isChecked
+    ? rooms
+      .filter((room) => room.guest)
+      .map((room) => ({ text: room.guest, value: room.guest }))
+    : []
+  ), [rooms, isChecked]);
 
   const columns = [
     {
       title: 'Number',
       dataIndex: 'number',
+      key: 'number',
     },
     {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      filters: [
-      {
-        text: 'standard',
-        value: 'standard',
-      },
-      {
-        text: 'suite',
-        value: 'suite',
-      },
-      {
-        text: 'deluxe',
-        value: 'deluxe',
-      },
-      ],
-      filteredValue: filteredInfo.type || null,
-      onFilter: (value, record) => record.type.includes(value),
-      sortOrder: sortedInfo.columnKey === 'name' ? sortedInfo.order : null,
-      ellipsis: true,
+      render: (type) => <span>{ROOM_TYPE_LABEL[type]}</span>,
+       filters: Object.values(ROOMS_TYPES).map((type) => ({ text: ROOM_TYPE_LABEL[type], value: type })),
+       onFilter: (type, record) => record.type === type,
+       filteredValue: filteredInfo.type || null,
     },
-
     {
       title: 'Occupancy',
       dataIndex: 'occupancy',
       key: 'occupancy',
-      filters: [
-        {
-          text: '2',
-          value: '2',
-        },
-        {
-          text: '3',
-          value: '3',
-        },
-        {
-          text: '4',
-          value: '4',
-        },
-        ],
-        filteredValue: filteredInfo.occupancy || null,
-        onFilter: (value, record) => record.occupancy.includes(value),
-        sortOrder: sortedInfo.columnKey === 'name' ? sortedInfo.order : null,
-        ellipsis: true,
+       filters: ROOM_OCCUPANCY_LIST.map((occupancy) => ({ text: occupancy, value: occupancy })),
+       onFilter: (occupancy, record) => record.occupancy === occupancy,
+       filteredValue: filteredInfo.occupancy || null,
     },
     {
-      title: 'Price',
-      dataIndex: 'price',
-      sorter: {
-        compare: (a, b) => a.price - b.price,
-        multiple: 1,
-      },
+        title: 'Price',
+        dataIndex: 'price',
+        key: 'price',
+        render: (text) => <span>{text}$</span>,
+        sorter: (a, b) => a.price - b.price,
+        sortOrder: sortedInfo.columnKey === 'price' && sortedInfo.order,
+      
     },
     {
-      title: 'Guest',
-      dataIndex: 'guest',
-      sorter: {
-        compare: (a, b) => a.guest - b.guest,
-        multiple: 1,
-      },
+        title: 'Guest',
+        dataIndex: 'guest',
+        key: 'guest',
+        filters: guestsOptions,
+        onFilter: (text, record) => record.guest.startsWith(text),
+        filteredValue: filteredInfo.guest || null,
+      
     },
     {
       title: '',
@@ -150,7 +136,7 @@ useEffect(() =>{
       
       render: (text, record) => (
         <Button type="primary" >
-          <Link to={`./room/${ record.id}`}>
+          <Link to={`/${record.id}`}>
             More information
           </Link>
         </Button> 
@@ -158,12 +144,23 @@ useEffect(() =>{
     },
   ];
   
-  const onChange = (pagination, filters, sorter, extra) => {
-    console.log('params', pagination, filters, sorter, extra);
+  const handleCheckboxChange = (event) => {
+    setIsChecked(event.target.checked);
+  };
+  const handleTableChange = (pagination, filters, sorter) => {
+    setFilteredInfo(filters);
+    setSortedInfo(sorter);
+  };
+  const clearAll = () => {
+    setFilteredInfo({});
+    setSortedInfo({});
+    setIsChecked(false);
   };
     
  
   return (
+   
+  
     <Layout>
       <Header>
       <div className="header">
@@ -178,10 +175,10 @@ useEffect(() =>{
           
         </div>
       </div>
-        < Menu
+        {/* < Menu
           theme="dark"
           mode="horizontal" 
-        />
+        /> */}
             
 
       </Header>
@@ -195,11 +192,12 @@ useEffect(() =>{
               marginBottom: 16,
             }}
           >
-            <Button onClick={setOccSort}>Sort occupancy</Button>
-            <Button onClick={clearFilters}>Clear filters</Button>
-            
+            <Button onClick={clearAll}>Clear filters</Button>
+            <Checkbox className="cbx-rooms" onChange={handleCheckboxChange} checked={isChecked}>
+            Free rooms only
+          </Checkbox>
           </Space>
-            <Table columns={columns} dataSource={data} onChange={handleChange} />
+            <Table  columns={columns} dataSource={rooms} onChange={handleTableChange} />
         </>
        
         
